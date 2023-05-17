@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var jwtKey = []byte("SECRET_KEY")
+var jwtKey = []byte("SANGAT_RAHASIA")
 
 type User struct {
 	ID       int    `json:"id"`
@@ -43,21 +43,20 @@ func AuthMiddleware() gin.HandlerFunc {
 
 func LoginHandler(c *gin.Context) {
 	var user User
-	//binding : langsung ke objectnya
-	//kalau scan di mapping
 	if err := c.ShouldBind(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	//logic authentication(compare username dan password)
+
+	
 	if user.Username == "enigma" && user.Password == "12345" {
-		//bikin code untuk generate token
+		
 		token := jwt.New(jwt.SigningMethodHS256)
 
 		claims := token.Claims.(jwt.MapClaims)
 
 		claims["username"] = user.Username
-		claims["exp"] = time.Now().Add(time.Minute * 1).Unix()
+		claims["exp"] = time.Now().Add(time.Minute * 1).Unix() 
 
 		tokenString, err := token.SignedString(jwtKey)
 		if err != nil {
@@ -65,16 +64,16 @@ func LoginHandler(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"token": tokenString})
+		c.JSON(http.StatusOK, gin.H{"token": tokenString}) 
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 	}
 }
 
 func ProfileHandler(c *gin.Context) {
-	//ambil username dari jwt tokennya
+
 	claims := c.MustGet("claims").(jwt.MapClaims)
 	username := claims["username"].(string)
-	//seharusnya response user dari db, tapi di contoh ini kita return usrname
+
 	c.JSON(http.StatusOK, gin.H{"username": username})
 }
